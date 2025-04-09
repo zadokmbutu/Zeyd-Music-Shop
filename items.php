@@ -1,25 +1,21 @@
 <?php
-// product.php - Music Shop Products
 
-// Sample product list
+
+// include 'header.php';
+// include 'navbar.php';
+
 $products = [
-    ["name" => "Acoustic Guitar", "category" => "Instruments", "price" => 199.99],
-    ["name" => "Electric Guitar", "category" => "Instruments", "price" => 349.99],
-    ["name" => "Digital Piano", "category" => "Instruments", "price" => 499.99],
-    ["name" => "Drum Set", "category" => "Instruments", "price" => 699.99],
-    ["name" => "Violin", "category" => "Instruments", "price" => 149.99],
-    ["name" => "Guitar Strings", "category" => "Accessories", "price" => 9.99],
-    ["name" => "Drum Sticks", "category" => "Accessories", "price" => 14.99],
-    ["name" => "Microphone", "category" => "Accessories", "price" => 89.99],
-    ["name" => "Classical Music Album", "category" => "Albums", "price" => 12.99],
-    ["name" => "Rock Music Album", "category" => "Albums", "price" => 15.99]
+    ["id" => 1, "name" => "Acoustic Guitar", "category" => "Instruments", "price" => 25800],
+    ["id" => 2, "name" => "Electric Guitar", "category" => "Instruments", "price" => 45250],
+    ["id" => 3, "name" => "Digital Piano", "category" => "Instruments", "price" => 65000],
+    ["id" => 4, "name" => "Drum Set", "category" => "Instruments", "price" => 90300],
+    ["id" => 5, "name" => "Violin", "category" => "Instruments", "price" => 19400],
+    ["id" => 6, "name" => "Guitar Strings", "category" => "Accessories", "price" => 1290],
+    ["id" => 7, "name" => "Drum Sticks", "category" => "Accessories", "price" => 1940],
+    ["id" => 8, "name" => "Microphone", "category" => "Accessories", "price" => 11640],
+    ["id" => 9, "name" => "Classical Music Album", "category" => "Albums", "price" => 1680],
+    ["id" => 10, "name" => "Rock Music Album", "category" => "Albums", "price" => 2070]
 ];
-
-// Sorting function
-$sort = $_GET['sort'] ?? 'name'; // Default sorting by name
-usort($products, function ($a, $b) use ($sort) {
-    return $a[$sort] <=> $b[$sort];
-});
 ?>
 
 <!DOCTYPE html>
@@ -28,11 +24,28 @@ usort($products, function ($a, $b) use ($sort) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Shop - Products</title>
+    <script>
+        function addToCart(productId) {
+            fetch('update_cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `product_id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Product added to cart!');
+                    document.getElementById('cart-count').textContent = data.cart_count;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: #f8f8f8;
             text-align: center;
         }
@@ -40,24 +53,11 @@ usort($products, function ($a, $b) use ($sort) {
             background-color: #222;
             color: white;
             padding: 20px;
-            margin: 0;
-        }
-        p {
-            font-size: 18px;
-            margin: 20px;
         }
         .container {
             width: 90%;
             margin: auto;
             overflow: hidden;
-        }
-        .search-bar {
-            margin: 20px auto;
-            width: 50%;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #ff6600;
-            border-radius: 5px;
         }
         table {
             width: 100%;
@@ -74,10 +74,6 @@ usort($products, function ($a, $b) use ($sort) {
         th {
             background-color: #ff6600;
             color: white;
-            cursor: pointer;
-        }
-        th:hover {
-            background-color: #e65c00;
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
@@ -85,42 +81,33 @@ usort($products, function ($a, $b) use ($sort) {
         tr:hover {
             background-color: #ddd;
         }
-        @media (max-width: 600px) {
-            .search-bar {
-                width: 80%;
-            }
-            table {
-                font-size: 14px;
-            }
+        .cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .cart-btn:hover {
+            background-color: #218838;
         }
     </style>
-    <script>
-        function filterProducts() {
-            let input = document.getElementById("search").value.toLowerCase();
-            let rows = document.querySelectorAll("tbody tr");
-
-            rows.forEach(row => {
-                let text = row.innerText.toLowerCase();
-                row.style.display = text.includes(input) ? "" : "none";
-            });
-        }
-    </script>
 </head>
 <body>
 
     <h1>🎵 Welcome to Our Music Shop 🎶</h1>
     <p>We sell a variety of musical instruments, accessories, and albums.</p>
 
-    <!-- Search Bar -->
-    <input type="text" id="search" class="search-bar" onkeyup="filterProducts()" placeholder="🔍 Search products...">
-
     <div class="container">
         <table>
             <thead>
                 <tr>
-                    <th><a href="?sort=name" style="color: white; text-decoration: none;">Product Name ⬆</a></th>
-                    <th><a href="?sort=category" style="color: white; text-decoration: none;">Category ⬆</a></th>
-                    <th><a href="?sort=price" style="color: white; text-decoration: none;">Price ($) ⬆</a></th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price (Ksh)</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,11 +116,20 @@ usort($products, function ($a, $b) use ($sort) {
                         <td><?= htmlspecialchars($product['name']) ?></td>
                         <td><?= htmlspecialchars($product['category']) ?></td>
                         <td><?= number_format($product['price'], 2) ?></td>
+                        <td>
+                            <button class="cart-btn" onclick="addToCart(<?= $product['id'] ?>)">
+                                🛒 Add to Cart
+                            </button>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 
-</body>
-</html>
+    <div>
+        <p>🛒 Cart Items: <span id="cart-count"><?= isset($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'quantity')) : 0 ?></span></p>
+    </div>
+                </body>
+                </html>
+

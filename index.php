@@ -1,105 +1,120 @@
-<?php include 'header.php' ;?>
-<?php include 'navbar.php' ;?>
-<?php include 'database.php' ;?>
-<?php include 'slideshow.php' ;?>
-<body>
-    <!-- Navigation -->
-   
-    <!-- Main Content -->
-    <div class="container py-5">
-       
-        
-       <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-            <?php
-            if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
-                    $image = !empty($row["image_url"]) ? $row["image_url"] : "https://via.placeholder.com/300x200?text=No+Image";
-                    
-                    echo '<div class="col">
-                        <div class="card h-100">
-                            <img src="' . htmlspecialchars($image) . '" class="card-img-top" alt="' . htmlspecialchars($row["name"]) . '">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">' . htmlspecialchars($row["name"]) . '</h5>
-                                <p class="card-text">' . htmlspecialchars(substr($row["description"], 0, 100)) . '</p>
-                                <div class="mt-auto">
-                                    <p class="fs-5 fw-bold text-primary">$' . number_format($row["price"], 2) . '</p>
-                                    <button class="btn btn-primary add-to-cart" data-product-id="' . $row["product_id"] . '">
-                                        <i class="fas fa-cart-plus"></i> Add to Cart
-                                    </button>
-                                    <a href="product.php?id=' . $row["product_id"] . '" class="btn btn-outline-secondary">
-                                        <i class="fas fa-eye"></i> Details
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>';
-                }
-            } else {
-                echo "<div class='col-12'><p class='text-center'>No products found</p></div>";
-            }
-            ?>
-        </div>
-    </div>
+<?php 
+session_start();
+include 'header.php';
+include 'navbar.php';
+include 'database.php';
+include 'slideshow.php';
+include 'items.php';
 
-    <!-- Footer -->
+// Personalized Product Fetch Logic (Step 2)
+$user_id = $_SESSION['user_id'] ?? null;
 
+// Default query if no user or no preferences
+$query = "SELECT * FROM products ORDER BY RAND() LIMIT 10";
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Cart Functionality -->
+// Personalization logic
+if ($user_id) {
+    $stmt = $conn->prepare("SELECT favorite_category FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($favorite_category);
+    if ($stmt->fetch() && !empty($favorite_category)) {
+        $query = "SELECT * FROM products WHERE category = '$favorite_category' ORDER BY RAND() LIMIT 10";
+    }
+    $stmt->close();
+}
+
+// Fetch products from the database
+$result = $conn->query($query);
+
+if (!$result) {
+    die("Query failed: " . $conn->error);
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Shop - Products</title>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add to cart buttons
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const productId = this.getAttribute('data-product-id');
-                    addToCart(productId);
-                });
-            });
-            
-            // Update cart count based on localStorage
-            updateCartCount();
-        });
-        
         function addToCart(productId) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
-            // Check if product already in cart
-            const existingProduct = cart.find(item => item.id === productId);
-            
-            if (existingProduct) {
-                existingProduct.quantity += 1;
-            } else {
-                cart.push({
-                    id: productId,
-                    quantity: 1
-                });
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('cart', JSON.stringify(cart));
-            
-            // Update cart count
-            updateCartCount();
-            
-            // Show alert
-            alert('Product added to cart!');
-        }
-        
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
-            document.getElementById('cart-count').textContent = count;
+            fetch('update_cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `product_id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Product added to cart!');
+                    document.getElementById('cart-count').textContent = data.cart_count;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+        h1 {
+            background-color: #222;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #ff6600;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .cart-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .cart-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
 </body>
 </html>
 
-<?php
+<?php 
 $conn->close();
+include 'footer.php'; 
 ?>
-<?php include 'footer.php' ;?>
-

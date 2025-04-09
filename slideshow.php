@@ -65,30 +65,39 @@ img {vertical-align: middle;}
 @media only screen and (max-width: 300px) {
   .text {font-size: 11px}
 }
+
+/* Style images to have the same width and height */
+.mySlides img {
+  width: 100%; /* Ensure it fills the container */
+  height: 400px; /* Set a fixed height */
+  object-fit: cover; /* Maintain aspect ratio, crop the image if necessary */
+}
 </style>
 </head>
 <body>
+
 <div class="slideshow-container">
 
 <div class="mySlides fade">
   <div class="numbertext">1 / 3</div>
-  <img src="https://www.ibanez.com/usa/products/detail/news_file/file/feat_MRC10_preamp.jpg" style="width:100%">
+  <img src="https://www.ibanez.com/usa/products/detail/news_file/file/feat_MRC10_preamp.jpg">
   <div class="text">Caption Text</div>
 </div>
 
 <div class="mySlides fade">
   <div class="numbertext">2 / 3</div>
-  <img src="https://www.ibanez.com/common/product_artist_file/file/a_main_ichika.jpg" style="width:100%">
+  <img src="https://www.ibanez.com/common/product_artist_file/file/a_main_ichika.jpg">
   <div class="text">Caption Two</div>
 </div>
 
 <div class="mySlides fade">
   <div class="numbertext">3 / 3</div>
-  <img src="https://www.ibanez.com/common/product_artist_file/file/a_main_TimHenson_.jpg" style="width:100%">
+  <img src="https://www.ibanez.com/common/product_artist_file/file/a_main_TimHenson_.jpg">
   <div class="text">Caption Three</div>
 </div>
 
 </div>
+
 <br>
 
 <div style="text-align:center">
@@ -115,9 +124,9 @@ function showSlides() {
   }
   slides[slideIndex-1].style.display = "block";  
   dots[slideIndex-1].className += " active";
-  setTimeout(showSlides, 3000); // Change image every 4 seconds
+  setTimeout(showSlides, 4000); // Change image every 4 seconds
 }
 </script>
 
 </body>
-</html> 
+</html>

@@ -14,7 +14,7 @@ if (!isset($_SESSION['csrf_token'])) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Check CSRF token validity
+    // Validate CSRF token
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         $message = "Invalid request.";
     } else {
@@ -22,15 +22,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = htmlspecialchars(trim($_POST['name']));
         $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
         $password = trim($_POST['password']);
-        $role = isset($_POST['role']) ? trim($_POST['role']) : 'student';
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $message = "Invalid email format.";
         } elseif (strlen($password) < 6) {
             $message = "Password must be at least 6 characters.";
         } else {
-            // Check if email already exists
-            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+            // Check if the email already exists
+            $stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
+            if (!$stmt) {
+                die("Prepare failed: " . $conn->error);
+            }
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $stmt->store_result();
@@ -41,9 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Hash the password
                 $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-                // Insert user into database
-                $stmt = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-                $stmt->bind_param("ssss", $name, $email, $hashed_password, $role);
+                // ✅ Fixed: Removed `role` column and added timestamps
+                $stmt = $conn->prepare("INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+                if (!$stmt) {
+                    die("Prepare failed: " . $conn->error);
+                }
+                $stmt->bind_param("sss", $name, $email, $hashed_password);
 
                 if ($stmt->execute()) {
                     $message = "Registration successful! You can now log in.";
@@ -85,9 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="password" class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" id="password" required>
                 </div>
-
-              
-               
 
                 <button type="submit" class="btn btn-primary w-100">Register</button>
                 

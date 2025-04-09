@@ -1,6 +1,9 @@
 <?php
 // Start the session to access user data
 session_start();
+include 'header.php' ;
+include 'navbar.php' ;
+ include 'database.php'; 
 
 // Check if user is logged in, if not redirect to login page
 if (!isset($_SESSION['user_id'])) {

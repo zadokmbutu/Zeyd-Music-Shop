@@ -1,5 +1,5 @@
 <?php
-session_start(); // Must be first, before any output
+session_start(); // Ensure session starts before any output
 
 include 'header.php';
 include 'navbar.php';
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password']);
 
     // Fetch user by email
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT user_id, name, password, is_admin FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -22,36 +22,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verify password
         if (password_verify($password, $user['password'])) {
-            if (session_status() === PHP_SESSION_ACTIVE) {
-                session_regenerate_id(true);
-            }
+            session_regenerate_id(true); // Prevent session fixation attacks
 
             $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['role'] = $user['role'];
             $_SESSION['name'] = $user['name'];
+            $_SESSION['is_admin'] = $user['is_admin']; // Store admin status
 
-            // Redirect based on role
-            if ($user['role'] === 'admin') {
-                header("Location: admin_dashboard.php");
-                exit;
-            } elseif ($user['role'] === 'teacher') {
-                header("Location: teacher_dashboard.php");
-                exit;
-            } elseif ($user['role'] === 'student') {
-                header("Location: student_dashboard.php");
-                exit;
+            // Redirect based on user role
+            if ($user['is_admin'] == 1) {
+                header("Location: admin.php"); // Redirect admin users
             } else {
-                $message = "Role not recognized.";
+                header("Location: dashboard.php"); // Redirect normal users
             }
+            exit;
         } else {
             $message = "Invalid password. Please try again.";
         }
     } else {
         $message = "No account found with this email. Please register.";
     }
-}
-?>
 
+    $stmt->close();
+}
+
+$conn->close();
+?>
 
 <div class="container mt-5">
     <div class="row justify-content-center">

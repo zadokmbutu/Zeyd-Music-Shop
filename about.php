@@ -1,3 +1,5 @@
+<?php include 'header.php' ;?>
+<?php include 'navbar.php' ;?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,9 +82,10 @@
     </div>
 </div>
 
-<div class="footer">
+<!-- <div class="footer">
     &copy; <?php echo date("Y"); ?> Zeyd Music Shop. All Rights Reserved.
-</div>
+</div> -->
 
 </body>
 </html>
+<?php include 'footer.php' ;?>
