@@ -2,33 +2,164 @@
 session_start();
 include 'header.php';
 include 'navbar.php';
-include 'database.php';
-
+include 'database.php';  // Ensure this includes your correct DB connection details
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login"); // Redirect to login if not logged in
+    header("Location: login.php");  // Redirect to login if the user is not logged in
     exit();
 }
 
+$user_id = $_SESSION['user_id'];  // Get the logged-in user's ID from the session
+
+// SQL query to fetch the user's details from the 'users' table
+$sql = "SELECT * FROM users WHERE user_id = ?";  // Use 'user_id' as the correct column
+$stmt = $conn->prepare($sql);  // Prepare the query
+$stmt->bind_param("i", $user_id);  // Bind the 'user_id' parameter (i = integer)
+$stmt->execute();  // Execute the query
+
+// Get the result and fetch the user's data
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();  // Fetch the user data from the result set
 ?>
-<div class="container">
-    <div class="row">
-        <div class="col">
+<style>
+    /* Container and Overall Layout */
+.dashboard-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
+/* User Details Section */
+.user-details {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-details h3 {
+    color: #333;
+}
+
+.detail-item {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #555;
+}
+
+.detail-item strong {
+    color: #000;
+}
+
+/* Payment Section */
+.payment-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-section h4 {
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 16px;
+    color: #555;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Submit Button */
+.btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+/* Logout Button */
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #c82333;
+}
+
+</style>
+<!-- HTML Structure with CSS classes -->
+<div class="container dashboard-container">
+    <div class="user-details">
+        <h3>Welcome, <?php echo htmlspecialchars($user['name']); ?>!</h3>
+        <p>Here are your account details:</p>
+        <div class="detail-item">
+            <strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?>
         </div>
-        <div class="col"> </div>
-        <div class="col"><button class= "btn btn-primary" onclick="location.href='logout.php'">Logout</button></div>
+        <div class="detail-item">
+            <strong>Registered On:</strong> <?php echo htmlspecialchars($user['registration_date']); ?>
+        </div>
     </div>
-</div>
-<div>
-    WECOME TO YOUR ACCOUNT!
-</div>
-<div>
-    <img src="https://c.tenor.com/qV9QZcasa-QAAAAd/welcome.gif" alt="Welcome Image">
-</div>
- <div>
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus numquam provident doloremque voluptates. Consequatur magni voluptatum rem beatae autem dignissimos provident accusantium temporibus, labore commodi nihil libero tempora officiis. Quisquam possimus voluptates, impedit perspiciatis tempore dolorem voluptate, fugit obcaecati voluptatibus alias repellendus, adipisci aliquid voluptas et aliquam explicabo nobis delectus nostrum harum praesentium facilis. Perferendis nemo dignissimos accusamus. Dolore sed corrupti doloremque modi rerum ducimus accusamus earum minima vitae atque quam corporis debitis, dolores nemo in fuga quibusdam aspernatur deleniti accusantium expedita quis ea eos quaerat! Dicta quia magni facere recusandae ipsum? Voluptates numquam laboriosam facere deserunt illo perferendis et eligendi voluptatem pariatur, cumque sequi fugiat quae harum. Asperiores ipsa unde eaque numquam? Suscipit quisquam animi dolores consequatur, saepe minus consequuntur at est iusto ipsam, pariatur sequi voluptas facilis officiis nihil? Soluta delectus voluptate, eligendi aliquid veniam dignissimos illo quae omnis maxime in laudantium similique quo reiciendis at vitae, deserunt ex facere ad doloremque commodi! Dignissimos vel enim delectus eligendi distinctio officiis aspernatur error libero laborum et optio at nobis iusto ad, neque expedita minima necessitatibus. Perferendis facilis dignissimos ipsam non aperiam cum cupiditate, harum in culpa eos et nisi nihil, est assumenda! Itaque earum fuga ad ratione labore. Ducimus odio aliquid cumque natus similique ipsa laborum iure magni tempora tempore voluptatem, alias facere doloremque? Id debitis dignissimos quae tempora aliquam animi officia obcaecati dolorum vero numquam dolor consectetur ad dolores corporis nostrum earum veritatis ipsam sapiente, aperiam qui cupiditate. Eligendi blanditiis quis, libero soluta excepturi dolores repellat nobis odit iure perspiciatis saepe quasi inventore totam omnis voluptate, quo, ea iste. Debitis vero consequuntur laborum quas nostrum, minus quos dignissimos sit repellendus officia nobis molestias tempora reprehenderit voluptate voluptatibus quod rem ratione, reiciendis dolor itaque commodi nemo? Perspiciatis facilis eos iste cupiditate cumque, ab dignissimos esse in atque quod blanditiis maiores nesciunt animi accusantium sint, quas quos. Rem ratione praesentium, perspiciatis sed harum enim repellendus culpa! Veniam, accusamus totam unde quas veritatis voluptatibus, inventore dignissimos maxime, mollitia eveniet fuga! Dicta illo labore, commodi, architecto aperiam inventore necessitatibus explicabo reiciendis numquam, praesentium a? In modi maiores iste deserunt repellat totam culpa eligendi quos voluptatem! Labore perferendis sit esse dolorem, magni cum cumque, voluptatum consequuntur excepturi dolorum in adipisci blanditiis culpa sapiente rem temporibus iure tenetur et modi ratione eaque exercitationem. Officia expedita, nam optio esse minus voluptate exercitationem ipsam in saepe nulla. Libero hic quam modi nobis vitae dolore reprehenderit, tenetur cum perferendis quod? Dolore, labore fugiat. Autem libero placeat dolores voluptates ea ipsa provident eius asperiores sunt repudiandae neque, inventore unde. Maiores iste sit consequuntur aliquid impedit vel. Obcaecati inventore quae veniam quisquam labore. Beatae, harum. Laudantium non reiciendis quam rerum laboriosam sit error ipsum eaque vero, quis et quia asperiores! Id harum neque quasi sint unde, natus aspernatur voluptatibus facilis, quam accusamus minima aliquam illo deleniti rerum enim commodi. Veniam suscipit esse sint tenetur quod, odio inventore eaque eligendi velit at autem sequi laboriosam laborum ducimus! Ab sequi distinctio, soluta eius voluptates ut illo autem vitae hic beatae numquam nesciunt temporibus earum dolorum explicabo. Consectetur, assumenda. Quidem ex culpa amet fuga atque nostrum aut rerum ab pariatur nam. Quis, magni expedita? Architecto nulla, totam vel aliquid quasi recusandae distinctio est obcaecati expedita rem asperiores nesciunt quidem esse deserunt ipsa enim quia eum omnis? Blanditiis eligendi perferendis reprehenderit quo! Rerum accusamus quam tenetur enim eos eius odit dignissimos dolore soluta. Quisquam laboriosam illo obcaecati, dolore, repellat quia consectetur dolores minima placeat veritatis beatae autem sapiente soluta fugit. Excepturi sint illum obcaecati sapiente nisi quos, distinctio voluptates cum veniam nesciunt ipsum dolorum vitae debitis ipsa dolorem ipsam soluta, nobis sunt reprehenderit pariatur dolor ea minima! Nulla debitis voluptatem rerum cumque odit numquam ducimus consequatur fuga omnis qui quisquam, explicabo ab accusamus eligendi in, architecto, sunt odio rem iusto cum quia! Reiciendis explicabo iste dolore optio. Reiciendis, ea, deleniti similique officiis eum eligendi libero ut repellendus blanditiis neque, est impedit. Ut laborum inventore, reiciendis nesciunt excepturi provident, iusto ipsam maxime delectus et voluptates consequatur quisquam porro! Autem blanditiis quis, minima modi quaerat sequi perspiciatis laudantium temporibus itaque enim voluptatibus unde quod corporis et doloribus, voluptatum possimus esse numquam ad earum expedita cum vel veritatis nam. Debitis molestias explicabo id a magni nostrum. Quas, molestias earum. Qui eaque officiis dolorem, consectetur sed, nemo eum sint, illo repellat commodi omnis dolorum ullam praesentium. Modi consequuntur doloremque cupiditate unde neque eos eum laboriosam debitis laborum nam nulla, blanditiis expedita sint facere delectus rerum quos officiis esse nesciunt velit assumenda recusandae. Dolorem dolore deleniti voluptatibus, atque labore tempora dicta nam, eum molestias asperiores minus rem doloremque voluptas architecto dolores a optio corporis esse quis exercitationem ducimus quia aut voluptate. Possimus odit ut perspiciatis omnis praesentium laboriosam accusantium amet deserunt doloremque accusamus cumque, natus, sint quasi dignissimos, et mollitia officiis nihil assumenda consectetur earum temporibus dolor! Qui, quam possimus aperiam libero at placeat vero dolores repellat fuga, necessitatibus quaerat similique voluptatibus earum magni numquam eveniet rerum. Velit veritatis qui, ducimus quia vel illo, odio quis, delectus eos omnis iure nulla. Aut aspernatur expedita incidunt beatae! Cum fuga, sunt libero repellendus facere provident hic illum, qui commodi doloribus sed, inventore quasi! Nobis, sit nesciunt quam, laboriosam facere aut velit quasi nostrum minus qui rerum libero consectetur est natus a perferendis! Eius tempora accusantium quae illo repellat iusto vel similique repellendus eum voluptate, praesentium assumenda labore officia maxime, harum iure, sapiente obcaecati voluptates ad vitae! Voluptas dignissimos aliquid sint expedita quod rerum hic quis praesentium, voluptates totam earum nemo laboriosam inventore. Beatae laborum ex, accusamus nulla, officiis dolorem earum tenetur ipsam unde labore porro doloribus modi perspiciatis molestiae rem impedit numquam! Repellendus, facere. Repudiandae voluptatem itaque ab sunt dolorum qui quia officia nobis repellat. Architecto harum odio cum soluta sint. Obcaecati consequatur illo, cumque similique fugiat a consectetur culpa aliquam, ab aperiam quae, hic quia molestias! Eveniet quia facilis quos impedit maiores dolor assumenda! Mollitia omnis veniam iusto molestias eaque quas accusamus ad eligendi illo, non odio amet facilis vitae reiciendis alias facere pariatur ipsam dignissimos. Dolorum, neque dolore?
- </div>
 
-<?php include 'footer.php';?>
+    <div class="payment-section">
+        <h4>Make a Payment</h4>
+        <!-- Payment Method Selection Form -->
+        <form action="payment.php" method="POST">
+            <div class="form-group">
+                <label for="method">Select Payment Method:</label>
+                <select class="form-control" id="method" name="method" required>
+                    <option value="">Choose Payment Method</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="mpesa">M-Pesa</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Enter Amount:</label>
+                <input type="number" class="form-control" id="amount" name="amount" required min="1" step="any">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+        </form>
+    </div>
 
+    <button class="btn btn-logout" onclick="location.href='logout.php'">Logout</button>
+</div>
+
+<?php include 'footer.php'; ?>
